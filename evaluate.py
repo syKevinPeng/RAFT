@@ -166,6 +166,29 @@ def validate_kitti(model, iters=24):
     return {'kitti-epe': epe, 'kitti-f1': f1}
 
 
+@torch.no_grad()
+    
+def validate_ouchi(model, iters = 1, output_path = 'ouchi_prediction'):
+    "perform testing on the Ouchi dataset"
+    """ Create submission for the Sintel leaderboard """
+    model.eval()
+    test_dataset = datasets.OuchiIllusion(split='testing', aug_params=None)
+
+    if not os.path.exists(output_path):
+        os.makedirs(output_path)
+
+    for test_id in range(len(test_dataset)):
+        image1, image2, (frame_id, ) = test_dataset[test_id]
+        padder = InputPadder(image1.shape, mode='kitti')
+        image1, image2 = padder.pad(image1[None].cuda(), image2[None].cuda())
+
+        _, flow_pr = model(image1, image2, iters=iters, test_mode=True)
+        flow = padder.unpad(flow_pr[0]).permute(1, 2, 0).cpu().numpy()
+
+        output_filename = os.path.join(output_path, frame_id)
+        frame_utils.writeFlowKITTI(output_filename, flow)
+
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--model', help="restore checkpoint")
@@ -193,5 +216,8 @@ if __name__ == '__main__':
 
         elif args.dataset == 'kitti':
             validate_kitti(model.module)
+        
+        elif args.dataset == 'ouchi':
+            validate_ouchi(model.module)
 
 

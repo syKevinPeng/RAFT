@@ -6,7 +6,7 @@ import torch.utils.data as data
 import torch.nn.functional as F
 
 import os
-import math
+from pathlib import Path
 import random
 from glob import glob
 import os.path as osp
@@ -176,6 +176,28 @@ class KITTI(FlowDataset):
         if split == 'training':
             self.flow_list = sorted(glob(osp.join(root, 'flow_occ/*_10.png')))
 
+# define custom dataset
+class OuchiIllusion(FlowDataset):
+    def __init__(self, aug_params=None, split='training', root='/home/siyuan/research/optical_illusion/experiment1'):
+        super(OuchiIllusion, self).__init__(aug_params, sparse=True)
+        if split == 'testing':
+            self.is_test = True
+
+        # root = osp.join(root, ")
+        if not Path(root).is_dir():
+            raise Exception("root is not a directory")
+        images1 = sorted(glob(osp.join(root, 'image_1/*.png')))
+        images2 = sorted(glob(osp.join(root, 'image_2/*.png')))
+
+        for img1, img2 in zip(images1, images2):
+            frame_id = 0
+            self.extra_info += [ [frame_id] ]
+            self.image_list += [ [img1, img2] ]
+
+        if split == 'training':
+            self.flow_list = sorted(glob(osp.join(root, 'flow_occ/*_10.png')))
+
+
 
 class HD1K(FlowDataset):
     def __init__(self, aug_params=None, root='datasets/HD1k'):
@@ -226,6 +248,9 @@ def fetch_dataloader(args, TRAIN_DS='C+T+K+S+H'):
     elif args.stage == 'kitti':
         aug_params = {'crop_size': args.image_size, 'min_scale': -0.2, 'max_scale': 0.4, 'do_flip': False}
         train_dataset = KITTI(aug_params, split='training')
+    elif args.stage == 'ouichi':
+        aug_params = {'crop_size': args.image_size, 'min_scale': -0.2, 'max_scale': 0.4, 'do_flip': False}
+        train_dataset = OuchiIllusion(aug_params, split='training')
 
     train_loader = data.DataLoader(train_dataset, batch_size=args.batch_size, 
         pin_memory=False, shuffle=True, num_workers=4, drop_last=True)
