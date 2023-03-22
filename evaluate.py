@@ -185,7 +185,7 @@ def validate_ouchi(model, iters = 1, output_path = 'ouchi_prediction'):
         _, flow_pr = model(image1, image2, iters=iters, test_mode=True)
         flow = padder.unpad(flow_pr[0]).permute(1, 2, 0).cpu().numpy()
 
-        output_filename = os.path.join(output_path, frame_id)
+        output_filename = os.path.join(output_path, f'{frame_id}.png')
         frame_utils.writeFlowKITTI(output_filename, flow)
 
 

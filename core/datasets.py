@@ -186,11 +186,15 @@ class OuchiIllusion(FlowDataset):
         # root = osp.join(root, ")
         if not Path(root).is_dir():
             raise Exception("root is not a directory")
+        if not Path(osp.join(root, 'image_1')).is_dir():
+            raise Exception("image_1 is not a directory")
         images1 = sorted(glob(osp.join(root, 'image_1/*.png')))
         images2 = sorted(glob(osp.join(root, 'image_2/*.png')))
+        if len(images1) != len(images2) or len(images1) == 0:
+            raise Exception(f"images1 and images2 are not the same length or empty:\nimages1:{images1}")
 
         for img1, img2 in zip(images1, images2):
-            frame_id = 0
+            frame_id = str(0)
             self.extra_info += [ [frame_id] ]
             self.image_list += [ [img1, img2] ]
 
