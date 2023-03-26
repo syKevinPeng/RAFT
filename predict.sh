@@ -1,0 +1,1 @@
+python evaluate.py --model models/raft-kitti.pth --dataset ouichi --input_dir "../output/right_down_1"

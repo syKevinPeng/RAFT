@@ -168,11 +168,11 @@ def validate_kitti(model, iters=24):
 
 @torch.no_grad()
     
-def validate_ouchi(model, iters = 1, output_path = 'ouchi_prediction'):
+def validate_ouchi(model,  input_dir, iters = 2,output_path = 'ouchi_prediction'):
     "perform testing on the Ouchi dataset"
     """ Create submission for the Sintel leaderboard """
     model.eval()
-    test_dataset = datasets.OuchiIllusion(split='testing', aug_params=None)
+    test_dataset = datasets.OuchiIllusion(split='testing', aug_params=None, root=input_dir)
 
     if not os.path.exists(output_path):
         os.makedirs(output_path)
@@ -196,6 +196,8 @@ if __name__ == '__main__':
     parser.add_argument('--small', action='store_true', help='use small model')
     parser.add_argument('--mixed_precision', action='store_true', help='use mixed precision')
     parser.add_argument('--alternate_corr', action='store_true', help='use efficent correlation implementation')
+    parser.add_argument('--input_dir', help='input directory')
+    parser.add_argument('--num_imgs', type = int,  help='number of frame to predict')
     args = parser.parse_args()
 
     model = torch.nn.DataParallel(RAFT(args))
@@ -218,6 +220,9 @@ if __name__ == '__main__':
             validate_kitti(model.module)
         
         elif args.dataset == 'ouchi':
-            validate_ouchi(model.module)
+            if args.num_imgs:
+                validate_ouchi(model.module, input_dir = args.input_dir, iters = args.num_imgs)
+            else:
+                validate_ouchi(model.module, input_dir = args.input_dir)
 
 
