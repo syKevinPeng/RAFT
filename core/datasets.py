@@ -194,7 +194,7 @@ class OuchiIllusion(FlowDataset):
             raise Exception(f"images1 and images2 are not the same length or empty:\nimages1:{images1}")
 
         for img1, img2 in zip(images1, images2):
-            frame_id = str(0)
+            frame_id = img1.split('/')[-1].split('.')[0]
             self.extra_info += [ [frame_id] ]
             self.image_list += [ [img1, img2] ]
 

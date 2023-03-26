@@ -168,7 +168,7 @@ def validate_kitti(model, iters=24):
 
 @torch.no_grad()
     
-def validate_ouchi(model,  input_dir, iters = 2,output_path = 'ouchi_prediction'):
+def validate_ouchi(model,  input_dir, iters = 2,output_path = '../ouchi_prediction'):
     "perform testing on the Ouchi dataset"
     """ Create submission for the Sintel leaderboard """
     model.eval()
@@ -224,5 +224,7 @@ if __name__ == '__main__':
                 validate_ouchi(model.module, input_dir = args.input_dir, iters = args.num_imgs)
             else:
                 validate_ouchi(model.module, input_dir = args.input_dir)
+        else:
+            raise ValueError('Unknown dataset')
 
 
