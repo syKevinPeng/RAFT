@@ -178,7 +178,7 @@ class KITTI(FlowDataset):
 
 # define custom dataset
 class OuchiIllusion(FlowDataset):
-    def __init__(self, aug_params=None, split='training', root='/home/siyuan/research/optical_illusion/experiment1'):
+    def __init__(self, aug_params=None, split='training', root='/home/siyuan/research/optical_illusion/output/right_down_10'):
         super(OuchiIllusion, self).__init__(aug_params, sparse=True)
         if split == 'testing':
             self.is_test = True
@@ -188,8 +188,8 @@ class OuchiIllusion(FlowDataset):
             raise Exception("root is not a directory")
         if not Path(osp.join(root, 'image_1')).is_dir():
             raise Exception("image_1 is not a directory")
-        images1 = sorted(glob(osp.join(root, 'image_1/*.png')))
-        images2 = sorted(glob(osp.join(root, 'image_2/*.png')))
+        images1 = sorted(glob(osp.join(root, 'image_1/*_10.png')))
+        images2 = sorted(glob(osp.join(root, 'image_1/*_11.png')))
         if len(images1) != len(images2) or len(images1) == 0:
             raise Exception(f"images1 and images2 are not the same length or empty:\nimages1:{images1}")
 
