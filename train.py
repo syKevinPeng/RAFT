@@ -18,7 +18,7 @@ from torch.utils.data import DataLoader
 from raft import RAFT
 import evaluate
 import datasets
-
+import tqdm
 from torch.utils.tensorboard import SummaryWriter
 
 try:
@@ -144,8 +144,8 @@ def train(args):
     model.cuda()
     model.train()
 
-    if args.stage != 'chairs':
-        model.module.freeze_bn()
+    # if args.stage != 'chairs':
+    #     model.module.freeze_bn()
 
     train_loader = datasets.fetch_dataloader(args)
     optimizer, scheduler = fetch_optimizer(args, model)

@@ -133,6 +133,23 @@ class FlyingChairs(FlowDataset):
                 self.flow_list += [ flows[i] ]
                 self.image_list += [ [images[2*i], images[2*i+1]] ]
 
+class ChairSDHom(FlowDataset):
+    def __init__(self, aug_params=None, split='train', root='/mnt/e/Downloads/ChairsSDHom'):
+        super(ChairSDHom, self).__init__(aug_params)
+        images1 = sorted(glob(osp.join(root, "data",'train','t0/*.png')))
+        images2 = sorted(glob(osp.join(root, "data",'train','t1/*.png')))
+        flows = sorted(glob(osp.join(root, "data",'train','flow/*.pfm')))
+        if len(images1) != len(images2) or len(images1) == 0:
+            raise Exception(f"images1 and images2 are not the same length or empty:\nimages1:{images1}")
+
+        for img1, img2 in zip(images1, images2):
+            frame_id = img1.split('/')[-1]
+            self.extra_info += [ [frame_id] ]
+            self.image_list += [ [img1, img2] ]
+
+        if split == 'training':
+            self.flow_list = flows
+
 
 class FlyingThings3D(FlowDataset):
     def __init__(self, aug_params=None, root='datasets/FlyingThings3D', dstype='frames_cleanpass'):
@@ -255,6 +272,11 @@ def fetch_dataloader(args, TRAIN_DS='C+T+K+S+H'):
     elif args.stage == 'ouichi':
         aug_params = {'crop_size': args.image_size, 'min_scale': -0.2, 'max_scale': 0.4, 'do_flip': False}
         train_dataset = OuchiIllusion(aug_params, split='training')
+    elif args.stage == 'chairSD':
+        aug_params = {'crop_size': args.image_size, 'min_scale': -0.1, 'max_scale': 1.0, 'do_flip': False}
+        train_dataset = ChairSDHom(aug_params, split='training')
+    else:
+        raise Exception('Unknown stage: %s' % args.stage)
 
     train_loader = data.DataLoader(train_dataset, batch_size=args.batch_size, 
         pin_memory=False, shuffle=True, num_workers=4, drop_last=True)
