@@ -134,21 +134,32 @@ class FlyingChairs(FlowDataset):
                 self.image_list += [ [images[2*i], images[2*i+1]] ]
 
 class ChairSDHom(FlowDataset):
-    def __init__(self, aug_params=None, split='train', root='/mnt/e/Downloads/ChairsSDHom'):
+    def __init__(self, aug_params=None, split='training', root='/mnt/e/Downloads/ChairsSDHom'):
         super(ChairSDHom, self).__init__(aug_params)
-        images1 = sorted(glob(osp.join(root, "data",'train','t0/*.png')))
-        images2 = sorted(glob(osp.join(root, "data",'train','t1/*.png')))
-        flows = sorted(glob(osp.join(root, "data",'train','flow/*.pfm')))
-        if len(images1) != len(images2) or len(images1) == 0:
-            raise Exception(f"images1 and images2 are not the same length or empty:\nimages1:{images1}")
-
-        for img1, img2 in zip(images1, images2):
-            frame_id = img1.split('/')[-1]
-            self.extra_info += [ [frame_id] ]
-            self.image_list += [ [img1, img2] ]
-
         if split == 'training':
+            images1 = sorted(glob(osp.join(root, "data",'train','t0/*.png')))
+            images2 = sorted(glob(osp.join(root, "data",'train','t1/*.png')))
+            flows = sorted(glob(osp.join(root, "data",'train','flow/*.pfm')))
+            if len(images1) != len(images2) or len(images1) == 0:
+                raise Exception(f"images1 and images2 are not the same length or empty:\nimages1:{images1}")
+
+            for img1, img2 in zip(images1, images2):
+                frame_id = img1.split('/')[-1]
+                self.extra_info += [ [frame_id] ]
+                self.image_list += [ [img1, img2] ]
             self.flow_list = flows
+        
+        if split == 'validation':
+            self.flow_list = sorted(glob(osp.join(root, "data",'test','flow/*.pfm')))
+            self.image_list = []
+            images1 = sorted(glob(osp.join(root, "data",'test','t0/*.png')))
+            images2 = sorted(glob(osp.join(root, "data",'test','t1/*.png')))
+            if len(images1) != len(images2) or len(images1) == 0:
+                raise Exception(f"images1 and images2 are not the same length or empty:\nimages1:{images1}")
+            for img1, img2 in zip(images1, images2):
+                frame_id = img1.split('/')[-1]
+                self.extra_info += [ [frame_id] ]
+                self.image_list += [ [img1, img2] ]
 
 
 class FlyingThings3D(FlowDataset):

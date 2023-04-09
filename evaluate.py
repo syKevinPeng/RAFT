@@ -188,6 +188,26 @@ def validate_ouchi(model,  input_dir, iters = 2,output_path = '../ouchi_predicti
         output_filename = os.path.join(output_path, f'{frame_id}.png')
         frame_utils.writeFlowKITTI(output_filename, flow)
 
+@torch.no_grad()
+def validate_chairSD(model, iters = 2):
+
+    model.eval()
+    epe_list = []
+
+    val_dataset = datasets.ChairSDHom(split='validation')
+    for val_id in range(len(val_dataset)):
+        image1, image2, flow_gt, _ = val_dataset[val_id]
+        image1 = image1[None].cuda()
+        image2 = image2[None].cuda()
+
+        _, flow_pr = model(image1, image2, iters=iters, test_mode=True)
+        epe = torch.sum((flow_pr[0].cpu() - flow_gt)**2, dim=0).sqrt()
+        epe_list.append(epe.view(-1).numpy())
+
+    epe = np.mean(np.concatenate(epe_list))
+    print("Validation ChairsSD EPE: %f" % epe)
+    return {'chairs': epe}
+
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
