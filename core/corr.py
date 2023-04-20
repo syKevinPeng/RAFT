@@ -44,6 +44,7 @@ class CorrBlock:
 
             corr = bilinear_sampler(corr, coords_lvl)
             corr = corr.view(batch, h1, w1, -1)
+            # print(f'corr.shape at level {i}: {corr.shape}')
             out_pyramid.append(corr)
 
         out = torch.cat(out_pyramid, dim=-1)

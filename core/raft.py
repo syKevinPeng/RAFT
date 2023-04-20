@@ -37,6 +37,11 @@ class RAFT(nn.Module):
             self.context_dim = cdim = 128
             args.corr_levels = 1 #4
             args.corr_radius = 1 #4
+        """
+        when level =4, radius  = 1, shape is [8, 46, 62, 9] for each level
+        when level =4, radius  = 4, shape is [8, 46, 62, 81] for each level
+        when level = 1, radius = 1, shape is [8, 46, 62, 9] for each level
+        """
 
         if 'dropout' not in self.args:
             self.args.dropout = 0

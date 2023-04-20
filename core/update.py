@@ -79,7 +79,11 @@ class SmallMotionEncoder(nn.Module):
 class BasicMotionEncoder(nn.Module):
     def __init__(self, args):
         super(BasicMotionEncoder, self).__init__()
+        # cor_planes = 9 when level = 1, radius = 1
+        # cor_planes = 324 when level = 4, radius = 4
         cor_planes = args.corr_levels * (2*args.corr_radius + 1)**2
+        if args.corr_levels == 1 and args.corr_radius == 1:
+            cor_planes = 36
         self.convc1 = nn.Conv2d(cor_planes, 256, 1, padding=0)
         self.convc2 = nn.Conv2d(256, 192, 3, padding=1)
         self.convf1 = nn.Conv2d(2, 128, 7, padding=3)
@@ -87,6 +91,12 @@ class BasicMotionEncoder(nn.Module):
         self.conv = nn.Conv2d(64+192, 128-2, 3, padding=1)
 
     def forward(self, flow, corr):
+        """
+        when level = 1, radius = 1,
+        corr: [B, C, H, W] = [8, 36, 46, 62]
+        when level = 4, radius = 4.
+        corr: [B, C, H, W] = [8, 324, 46, 62]
+        """
         cor = F.relu(self.convc1(corr))
         cor = F.relu(self.convc2(cor))
         flo = F.relu(self.convf1(flow))
@@ -125,6 +135,14 @@ class BasicUpdateBlock(nn.Module):
             nn.Conv2d(256, 64*9, 1, padding=0))
 
     def forward(self, net, inp, corr, flow, upsample=True):
+        """
+        when level = 1, radius = 1
+        flow: torch.Size([8, 2, 46, 62])
+        corr: torch.Size([8, 36, 46, 62])
+        when level  = 4, radius = 4
+        flow: torch.Size([8, 2, 46, 62])
+        corr: torch.Size([8, 324, 46, 62])
+        """
         motion_features = self.encoder(flow, corr)
         inp = torch.cat([inp, motion_features], dim=1)
 
