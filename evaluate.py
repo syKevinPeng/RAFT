@@ -168,7 +168,7 @@ def validate_kitti(model, iters=24):
 
 @torch.no_grad()
     
-def validate_ouchi(model,  input_dir, iters = 2,output_path = '../ouchi_prediction'):
+def validate_ouchi(model,  input_dir, output_path, iter = 12):
     "perform testing on the Ouchi dataset"
     """ Create submission for the Sintel leaderboard """
     model.eval()
@@ -182,14 +182,14 @@ def validate_ouchi(model,  input_dir, iters = 2,output_path = '../ouchi_predicti
         padder = InputPadder(image1.shape, mode='kitti')
         image1, image2 = padder.pad(image1[None].cuda(), image2[None].cuda())
 
-        _, flow_pr = model(image1, image2, iters=iters, test_mode=True)
+        _, flow_pr = model(image1, image2, test_mode=True, iters = iter)
         flow = padder.unpad(flow_pr[0]).permute(1, 2, 0).cpu().numpy()
 
         output_filename = os.path.join(output_path, f'{frame_id}.png')
         frame_utils.writeFlowKITTI(output_filename, flow)
 
 @torch.no_grad()
-def validate_chairSD(model, iters = 2):
+def validate_chairSD(model, iters = 12):
 
     model.eval()
     epe_list = []
@@ -218,6 +218,8 @@ if __name__ == '__main__':
     parser.add_argument('--alternate_corr', action='store_true', help='use efficent correlation implementation')
     parser.add_argument('--input_dir', help='input directory')
     parser.add_argument('--num_imgs', type = int,  help='number of frame to predict')
+    parser.add_argument('--output_dir', help='output directory')
+    parser.add_argument('--iter', type = int, help='number of iterations', default=12)
     args = parser.parse_args()
 
     model = torch.nn.DataParallel(RAFT(args))
@@ -240,10 +242,7 @@ if __name__ == '__main__':
             validate_kitti(model.module)
         
         elif args.dataset == 'ouchi':
-            if args.num_imgs:
-                validate_ouchi(model.module, input_dir = args.input_dir, iters = args.num_imgs)
-            else:
-                validate_ouchi(model.module, input_dir = args.input_dir)
+            validate_ouchi(model.module, input_dir = args.input_dir, output_path=args.output_dir, iter = args.iter)
         else:
             raise ValueError('Unknown dataset')
 
