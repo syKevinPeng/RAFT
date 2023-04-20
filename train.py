@@ -19,6 +19,7 @@ from raft import RAFT
 import evaluate
 import datasets
 import tqdm
+from pathlib import Path
 from torch.utils.tensorboard import SummaryWriter
 
 try:
@@ -136,6 +137,8 @@ class Logger:
 def train(args):
 
     model = nn.DataParallel(RAFT(args), device_ids=args.gpus)
+    output_path = Path(args.output_dir)
+    output_path.mkdir(parents=True, exist_ok=True)
     print("Parameter Count: %d" % count_parameters(model))
 
     if args.restore_ckpt is not None:
@@ -183,7 +186,7 @@ def train(args):
             logger.push(metrics)
 
             if total_steps % VAL_FREQ == VAL_FREQ - 1:
-                PATH = 'checkpoints/%d_%s.pth' % (total_steps+1, args.name)
+                PATH = output_path/f'{total_steps+1}_{args.name}.pth' 
                 torch.save(model.state_dict(), PATH)
 
                 results = {}
@@ -210,7 +213,7 @@ def train(args):
                 break
 
     logger.close()
-    PATH = 'checkpoints/%s.pth' % args.name
+    PATH = output_path/f'{args.name}.pth' 
     torch.save(model.state_dict(), PATH)
 
     return PATH
@@ -223,6 +226,7 @@ if __name__ == '__main__':
     parser.add_argument('--restore_ckpt', help="restore checkpoint")
     parser.add_argument('--small', action='store_true', help='use small model')
     parser.add_argument('--validation', type=str, nargs='+')
+    parser.add_argument('--output_dir', type=str, default='./checkpoints/')
 
     parser.add_argument('--lr', type=float, default=0.00002)
     parser.add_argument('--num_steps', type=int, default=100000)
