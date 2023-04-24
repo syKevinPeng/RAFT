@@ -35,7 +35,7 @@ class RAFT(nn.Module):
         else:
             self.hidden_dim = hdim = 128
             self.context_dim = cdim = 128
-            args.corr_levels = 4 #4
+            args.corr_levels = 1 #4
             args.corr_radius = 4 #4
         """
         when level =4, radius  = 1, shape is [8, 46, 62, 9] for each level
