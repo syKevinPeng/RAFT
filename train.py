@@ -42,7 +42,7 @@ except:
 # exclude extremly large displacements
 MAX_FLOW = 400
 SUM_FREQ = 100
-VAL_FREQ = 5000
+VAL_FREQ = 1
 
 
 def sequence_loss(flow_preds, flow_gt, valid, gamma=0.8, max_flow=MAX_FLOW):
@@ -198,7 +198,7 @@ def train(args):
                     elif val_dataset == 'kitti':
                         results.update(evaluate.validate_kitti(model.module))
                     elif val_dataset == 'chairSD':
-                        results.update(evaluate.validate_chairSD(model.module))
+                        results.update(evaluate.validate_chairSD(model.module, dataset_root = args.dataset_dir))
 
                 logger.write_dict(results)
                 
@@ -227,6 +227,7 @@ if __name__ == '__main__':
     parser.add_argument('--small', action='store_true', help='use small model')
     parser.add_argument('--validation', type=str, nargs='+')
     parser.add_argument('--output_dir', type=str, default='./checkpoints/')
+    parser.add_argument(f'--dataset_dir', type=str, default='/vulcanscratch/peng2000/ChairsSDHom/data')
 
     parser.add_argument('--lr', type=float, default=0.00002)
     parser.add_argument('--num_steps', type=int, default=100000)
@@ -249,5 +250,6 @@ if __name__ == '__main__':
 
     if not os.path.isdir('checkpoints'):
         os.mkdir('checkpoints')
+    print(f'image_size: {args.image_size}')
 
     train(args)

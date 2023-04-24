@@ -189,12 +189,12 @@ def validate_ouchi(model,  input_dir, output_path, iter = 12):
         frame_utils.writeFlowKITTI(output_filename, flow)
 
 @torch.no_grad()
-def validate_chairSD(model, iters = 12):
+def validate_chairSD(model, iters = 12, dataset_root = 'data/ChairSDHom'):
 
     model.eval()
     epe_list = []
 
-    val_dataset = datasets.ChairSDHom(split='validation')
+    val_dataset = datasets.ChairSDHom(split='validation', root = dataset_root)
     for val_id in range(len(val_dataset)):
         image1, image2, flow_gt, _ = val_dataset[val_id]
         image1 = image1[None].cuda()

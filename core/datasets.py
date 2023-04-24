@@ -149,7 +149,7 @@ class ChairSDHom(FlowDataset):
                 self.image_list += [ [img1, img2] ]
             self.flow_list = flows
         
-        if split == 'validation':
+        elif split == 'validation':
             self.flow_list = sorted(glob(osp.join(root, "data",'test','flow/*.pfm')))
             self.image_list = []
             images1 = sorted(glob(osp.join(root, "data",'test','t0/*.png')))
@@ -160,6 +160,8 @@ class ChairSDHom(FlowDataset):
                 frame_id = img1.split('/')[-1]
                 self.extra_info += [ [frame_id] ]
                 self.image_list += [ [img1, img2] ]
+        else:
+            raise Exception(f"split must be 'training' or 'validation', not {split}")
 
 
 class FlyingThings3D(FlowDataset):
